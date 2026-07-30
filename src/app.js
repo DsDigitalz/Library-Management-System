@@ -15,8 +15,24 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 // Security and utility middleware
-app.use(helmet());
-app.use(cors());
+// Disable CSP in Helmet to allow Swagger UI inline assets to load cleanly
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
+// Configure CORS to support Swagger UI "Try it out" and external clients
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-API-KEY'],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,8 +40,18 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Swagger UI Documentation route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Swagger UI Documentation route with persistent authorization and custom title
+const swaggerUiOptions = {
+  customSiteTitle: 'Library Management System API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    docExpansion: 'list',
+    filter: true,
+  },
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Health check route
 app.get('/health', (req, res) => {
