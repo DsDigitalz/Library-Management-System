@@ -1,0 +1,9 @@
+# Use this workspace to collaborate
+workspace:
+  id: 5fc50463-02bd-481f-8da5-a8377f3a04cf
+
+localResources:
+  collections:
+    - ../Library_Management_System_API.postman_collection.json
+  documents:
+    - ../README.md
